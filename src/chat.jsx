@@ -71,7 +71,7 @@ export default function Chat() {
                         </div>
                     </div>
                     <div className='overflow-auto h-full mb-4 flex flex-col chatScrollBar'>
-                        <ul className="space-y-2 overflow-auto h-full mb-4 flex flex-col">
+                        <ul className="space-y-2 overflow-auto h-full mb-4 flex flex-col p-1">
                             <li className="bg-gray-100 text-left text-gray-800 p-1 rounded-md w-fit max-w-[50%] mt-auto mr-auto">
                                 Hello Alok, I hope you're doing well.
                             </li>
