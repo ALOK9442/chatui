@@ -22,3 +22,10 @@
     }
   }
   
+  .blur-background {
+    filter: blur(5px);
+}
+
+.blur-exclude {
+    filter: blur(-6px); /* Adjust the value as needed to cancel out the blur */
+}

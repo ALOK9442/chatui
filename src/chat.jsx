@@ -1,32 +1,113 @@
 import { faEllipsisH, faEllipsisV, faEllipsisVertical, faFileInvoice, faPaperPlane, faPaperclip, faPhone, faPlus, faVideoCamera, faVoicemail } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import avatar from './assets/avatar.jpg';
 import ChatName from './chatname';
-import { Data } from './contact';
+// import { Data } from './contact';
 import './chat.css';
 import ActiveChats from './activechats';
+import ChatUser from './chatuser';
 
 export default function Chat() {
 
+    const Data = localStorage.getItem('Data') ? JSON.parse(localStorage.getItem('Data')) : [];
+    const [activeChatId, setActiveChatId] = useState(null);
+    const [activeChat, setActiveChat] = useState(false);
     const [msgs, setMsgs] = useState([]);
     const [inputValue, setInputValue] = useState('');
+    const [inputBox, setInputBox] = useState(false);
+
+
+
+    const handleChatClick = (chatId) => {
+        setActiveChatId(chatId);
+        localStorage.setItem('activeChatId', chatId);
+        setActiveChat(true);
+    };
 
     const sendMessage = (e) => {
         e.preventDefault();
         if (!inputValue.trim()) return;
         setMsgs([...msgs, inputValue]);
+        const date = new Date().toLocaleTimeString();
+        const userShobhit = [{
+            "name": "Shobhit Yadav",
+            "date": date,
+            "msg": [...msgs, inputValue]
+        }];
+        console.log(userShobhit);
+        localStorage.setItem("currentUser", JSON.stringify(userShobhit));
         setInputValue('');
     };
 
+    useEffect(() => {
+
+        // const Data = JSON.parse(localStorage.getItem("Data"));
+
+
+        const messages = localStorage.getItem('currentUser')
+        console.log(messages);
+        if (messages) {
+            setMsgs(JSON.parse(messages)[0].msg)
+        }
+        else {
+            setMsgs([])
+        }
+    }, [])
+
+    const onClick = () => {
+        setInputBox(true);
+    }
+
+    const addUser = () => {
+        const inputUser = document.getElementById('inputuser').value;
+        console.log(inputUser);
+        if (!inputUser.trim()) return;
+        Data.push({
+            id: Data.length + 1,
+            name: inputUser,
+            avatar: 'https://api.dicebear.com/8.x/pixel-art/svg',
+            lastMessage: "",
+        })
+        console.log(Data);
+        localStorage.setItem('Data', JSON.stringify(Data));
+        setActiveChatId(Data.length);
+        console.log(activeChatId);
+        // localStorage.setItem('activeChatId',);
+        // setActiveChat(true);
+        setInputBox(false);
+    }
+
     return (
         <div className="h-screen">
-            <div className="bg-indigo-950 rounded-lg h-[90%] flex ">
+
+            {
+                inputBox &&
+                <div className='absolute z-10 w-[25%] h-[30%] bg-indigo-950 border-gray-500 border-2 rounded-lg
+                    top-[50%] left-[50%] transform translate-x-[-50%] translate-y-[-50%] space-y-4 p-4'>
+                    <p>Enter User Name and start Chatting</p>
+                    <input type="text"
+                        id="inputuser"
+                        className='bg-transparent border-[0.2px] border-gray-500 w-[90%] h-[20%] mt-auto p-1'
+                    />
+                    <button className='border-2 border-gray-500'
+                        onClick={addUser}
+                    >
+                        Add User to Chat
+                    </button>
+                </div>
+            }
+            <div className={`bg-indigo-950 rounded-lg h-[90%] flex  ${inputBox ? 'blur-background' : ''}`}>
                 <div className='w-[50%] bg-transparent border-gray-500 border-r-[0.2px] overflow-y-auto hide-on-mobile'>
                     <div className='flex flex-col space-x-4 font-mono border-gray-500 border-b-[0.2px] pb-2'>
-                        <h2 className='text-white text-lg mr-auto ml-2 mt-2 hover:bg-amber-500'>
-                            Messages
-                        </h2>
+                        <div className='flex pr-2'>
+                            <h2 className='text-white text-lg mr-auto ml-2 mt-2 hover:bg-amber-500'>
+                                Messages
+                            </h2>
+                            <button onClick={onClick}>
+                                <FontAwesomeIcon icon={faPlus} className='w-4 h-4' />
+                            </button>
+                        </div>
                         <p className='text-green-400 text-xs mt-4 flex mr-auto'>Active Chats</p>
                         <div className='flex mt-1'>
                             {
@@ -38,75 +119,27 @@ export default function Chat() {
                             }
                         </div>
                     </div>
-                    <div className='flex items-center space-x-2 bg-[#393c5f]'>
-                        <img src={avatar}
-                            alt="profile"
-                            className='w-12 h-12 rounded-full mt-4'
-                        />
-                        <p className='flex flex-col'>
-                            <h2 className="text-white">Shobhit Yadav</h2>
-                            <span>Hello alok!!</span>
-                        </p>
-                    </div>
                     {
                         Data.map((data) => (
-                            <ChatName name={data.name} avatar={data.avatar} />
+                            <ChatName
+                                key={data.id}
+                                name={data.name}
+                                avatar={data.avatar}
+                                isActive={data.id === activeChatId}
+                                onClick={() => handleChatClick(data.id)}
+                                className={`hover:bg-[#393c5f]`}
+                            />
                         ))
                     }
                 </div>
-
-                <div className='flex flex-col w-full ml-auto'>
-                    <div className='flex justify-between space-x-4 font-mono pr-4 p-0 border-b-[0.5px] border-gray-500'>
-                        <div className='flex items-center space-x-2'>
-                            <img src={avatar}
-                                alt="profile"
-                                className='w`-12 h-12 rounded-full mt-4'
-                            />
-                            <h2 className="text-white">Shobhit Yadav</h2>
+                {
+                    activeChat ?
+                        <ChatUser />
+                        :
+                        <div className='flex flex-col w-full ml-auto my-auto'>
+                            Click on any chat to start conversation
                         </div>
-                        <div className='flex items-center space-x-6'>
-                            <FontAwesomeIcon icon={faPhone} className='w-4 h-4' />
-                            <FontAwesomeIcon icon={faVideoCamera} className='w-6 h-6' />
-                            <FontAwesomeIcon icon={faEllipsisV} className='w-6 h-6' />
-                        </div>
-                    </div>
-                    <div className='overflow-auto h-full mb-4 flex flex-col chatScrollBar'>
-                        <ul className="space-y-2 overflow-auto h-full mb-4 flex flex-col p-1">
-                            <li className="bg-gray-100 text-left text-gray-800 p-1 rounded-md w-fit max-w-[50%] mt-auto mr-auto">
-                                Hello Alok, I hope you're doing well.
-                            </li>
-                            <li className="bg-gray-100 text-left text-gray-800 p-1 rounded-md w-fit max-w-[50%] mt-auto ml-auto">
-                                Hello sir, I'm doing great, thank you. How about you?
-                            </li>
-                            <li className="bg-gray-100 text-left text-gray-800 p-1 rounded-md w-fit max-w-[50%] mt-auto mr-auto">
-                                We were incredibly impressed with your work on the task.Your work stood out among the other submissions,
-                                and we believe you'd be a valuable addition to our team. So, we'd like to extend an offer for the position to you.
-                            </li>
-                            {msgs.map((msg, index) => (
-                                <li key={index} className="bg-gray-100 text-gray-800 p-2 rounded-md w-fit max-w-[50%] mt-auto ml-auto">
-                                    {msg}
-                                </li>
-                            ))}
-                        </ul>
-                        <form onSubmit={sendMessage} className="flex w-full mt-auto ml-auto items-center border-gray-500 border-t-[0.2px] pt-2">
-                            <FontAwesomeIcon icon={faPaperclip} className="text-white p-2" />
-                            <input
-                                type="text"
-                                id="msg"
-                                className="flex-1 p-2 bg-[#393c5d] rounded-full text-white "
-                                value={inputValue}
-                                onChange={(e) => setInputValue(e.target.value)}
-                                placeholder="Type your message..."
-                            />
-                            <button
-                                type="submit"
-                                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full ml-2 mr-2"
-                            >
-                                <FontAwesomeIcon icon={faPaperPlane} />
-                            </button>
-                        </form>
-                    </div>
-                </div>
+                }
             </div>
         </div>
     );
