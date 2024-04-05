@@ -8,50 +8,55 @@ export default function ChatUser({ userName, ...props }) {
 
     const [msgs, setMsgs] = useState([]);
     const [inputValue, setInputValue] = useState('');
-    const [activeChat, setActiveChat] = useState(localStorage.getItem('activeChatId'));
 
+    const [activeChat, setActiveChat] = useState(localStorage.getItem('activeChatId'));
+    
     const sendMessage = (e) => {
         e.preventDefault();
         if (!inputValue.trim()) return;
+
+        // Update state with new message
         setMsgs([...msgs, inputValue]);
+
+        // Get current date
         const date = new Date().toLocaleTimeString();
-        const users = [{
-            "name": userName,
-            "date": date,
-            "msg": [...msgs, inputValue]
-        }];
-        console.log(users);
-        localStorage.setItem("users", JSON.stringify(users));
 
+        // Update localStorage with the new message
         const storedData = JSON.parse(localStorage.getItem("Data"));
-        const chat = storedData.find(chat => chat.id === activeChat);
-        if (chat) {
-            chat.messageHistory.push(inputValue);
-        }
-        localStorage.setItem("Data", JSON.stringify(storedData));
+        console.log(activeChat)
+        // const activeChatData = storedData.find(chat => chat.id === activeChat);
+        // console.log(activeChatData)
+        console.log(storedData)
+        storedData[activeChat - 1].messageHistory.push(inputValue)
+        console.log(storedData[0].id)
 
+        // const user = storedData.find(chat => chat.id === activeChat);
+        // user.messageHistory.push({ msg: inputValue, date: date })
+        localStorage.setItem("Data", JSON.stringify(storedData))
+
+        // Clear input field
         setInputValue('');
     };
 
+    useEffect(() => {
+        setActiveChat(localStorage.getItem('activeChatId'));
+        console.log(activeChat)
+    }, []);
 
 
     useEffect(() => {
-        // const messages = localStorage.getItem('Data')
         const storedData = JSON.parse(localStorage.getItem("Data"));
-
-        const messages = storedData.find(chat => chat.id === activeChat);
-        console.log(messages);
-        if (messages) {
-            setMsgs(JSON.parse(messages)[0].msg)
+        console.log(storedData)
+        const newid = localStorage.getItem('activeChatId');
+        console.log(newid)
+        if (storedData) {
+            setMsgs(storedData[newid - 1].messageHistory);
         }
         else {
-            setMsgs([])
+            setMsgs([]);
         }
+    }, [activeChat]);
 
-        setActiveChat(localStorage.getItem('activeChatId'));
-        console.log(activeChat);
-
-    }, [activeChat])
 
 
     return (
