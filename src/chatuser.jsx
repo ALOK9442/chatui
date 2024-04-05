@@ -38,10 +38,10 @@ export default function ChatUser({ userName, ...props }) {
         setInputValue('');
     };
 
-    useEffect(() => {
-        setActiveChat(localStorage.getItem('activeChatId'));
-        console.log(activeChat)
-    }, []);
+    // useEffect(() => {
+    //     setActiveChat(localStorage.getItem('activeChatId'));
+    //     console.log(activeChat)
+    // }, []);
 
 
     useEffect(() => {
@@ -51,11 +51,12 @@ export default function ChatUser({ userName, ...props }) {
         console.log(newid)
         if (storedData) {
             setMsgs(storedData[newid - 1].messageHistory);
+            // setMsgs([""])
         }
         else {
             setMsgs([]);
         }
-    }, [activeChat]);
+    }, [localStorage.getItem('activeChatId')]);
 
 
 
