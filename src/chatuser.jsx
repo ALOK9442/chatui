@@ -4,13 +4,11 @@ import React, { useEffect, useState } from 'react';
 import avatar from './assets/avatar.jpg'
 import './chat.css';
 
-export default function ChatUser() {
+export default function ChatUser({ userName, ...props }) {
 
     const [msgs, setMsgs] = useState([]);
     const [inputValue, setInputValue] = useState('');
-    const [userName, setUserName] = useState('Shobhit Yadav');
-
-    const activeChat = JSON.parse(localStorage.getItem("activeChatId"));
+    const [activeChat, setActiveChat] = useState(localStorage.getItem('activeChatId'));
 
     const sendMessage = (e) => {
         e.preventDefault();
@@ -24,14 +22,24 @@ export default function ChatUser() {
         }];
         console.log(users);
         localStorage.setItem("users", JSON.stringify(users));
+
+        const storedData = JSON.parse(localStorage.getItem("Data"));
+        const chat = storedData.find(chat => chat.id === activeChat);
+        if (chat) {
+            chat.messageHistory.push(inputValue);
+        }
+        localStorage.setItem("Data", JSON.stringify(storedData));
+
         setInputValue('');
     };
 
-    useEffect(() => {
-        const messages = localStorage.getItem('users')
-        const storedData = JSON.parse(localStorage.getItem("Data"));
-        console.log(activeChat);
 
+
+    useEffect(() => {
+        // const messages = localStorage.getItem('Data')
+        const storedData = JSON.parse(localStorage.getItem("Data"));
+
+        const messages = storedData.find(chat => chat.id === activeChat);
         console.log(messages);
         if (messages) {
             setMsgs(JSON.parse(messages)[0].msg)
@@ -40,12 +48,8 @@ export default function ChatUser() {
             setMsgs([])
         }
 
-        if (storedData && activeChat) {
-            const chat = storedData.find(chat => chat.id === activeChat);
-            if (chat) {
-                setUserName(chat.name);
-            }
-        }
+        setActiveChat(localStorage.getItem('activeChatId'));
+        console.log(activeChat);
 
     }, [activeChat])
 

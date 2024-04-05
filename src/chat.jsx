@@ -14,7 +14,7 @@ export default function Chat() {
     const [activeChatId, setActiveChatId] = useState(null);
     const [activeChat, setActiveChat] = useState(false);
     const [msgs, setMsgs] = useState([]);
-    const [inputValue, setInputValue] = useState('');
+    const [userName, setUserName] = useState('');
     const [inputBox, setInputBox] = useState(false);
 
 
@@ -25,20 +25,7 @@ export default function Chat() {
         setActiveChat(true);
     };
 
-    const sendMessage = (e) => {
-        e.preventDefault();
-        if (!inputValue.trim()) return;
-        setMsgs([...msgs, inputValue]);
-        const date = new Date().toLocaleTimeString();
-        const userShobhit = [{
-            "name": "Shobhit Yadav",
-            "date": date,
-            "msg": [...msgs, inputValue]
-        }];
-        console.log(userShobhit);
-        localStorage.setItem("currentUser", JSON.stringify(userShobhit));
-        setInputValue('');
-    };
+
 
     useEffect(() => {
 
@@ -55,26 +42,43 @@ export default function Chat() {
         }
     }, [])
 
+    useEffect(() => {
+        const Data = JSON.parse(localStorage.getItem("Data"));
+        if (activeChatId !== null && Data[activeChatId]) {
+            setUserName(Data[activeChatId-1].name);
+        } else if (Data.length > 0) {
+            // If activeChatId is null or invalid, set the userName to the last user's name
+            setUserName(Data[Data.length - 1].name);
+        }
+    }, [activeChatId]);
+
+
     const onClick = () => {
         setInputBox(true);
     }
 
     const addUser = () => {
         const inputUser = document.getElementById('inputuser').value;
-        console.log(inputUser);
         if (!inputUser.trim()) return;
-        Data.push({
+        const newUser = {
             id: Data.length + 1,
             name: inputUser,
             avatar: 'https://api.dicebear.com/8.x/pixel-art/svg',
             lastMessage: "",
-        })
-        console.log(Data);
+            messageHistory: []
+        };
+
+        Data.push(newUser);
         localStorage.setItem('Data', JSON.stringify(Data));
-        setActiveChatId(Data.length);
+        setUserName(newUser.name);
+        setActiveChatId(newUser.id);
+        console.log(newUser.id);
+        console.log(Data);
+        console.log(Data.length);
         console.log(activeChatId);
-        // localStorage.setItem('activeChatId',);
-        // setActiveChat(true);
+        localStorage.setItem('activeChatId', newUser.id);
+        setActiveChat(true);
+
         setInputBox(false);
     }
 
@@ -111,8 +115,10 @@ export default function Chat() {
                         <p className='text-green-400 text-xs mt-4 flex mr-auto'>Active Chats</p>
                         <div className='flex mt-1'>
                             {
-                                Data.map((data) => (
-                                    <div className=''>
+                                Data.map((data, index) => (
+                                    <div className=''
+                                        key={index}
+                                    >
                                         <ActiveChats avatar={data.avatar} />
                                     </div>
                                 ))
@@ -134,7 +140,9 @@ export default function Chat() {
                 </div>
                 {
                     activeChat ?
-                        <ChatUser />
+                        <ChatUser
+                            userName={userName}
+                        />
                         :
                         <div className='flex flex-col w-full ml-auto my-auto'>
                             Click on any chat to start conversation
