@@ -10,14 +10,12 @@ import ChatUser from './chatuser';
 
 export default function Chat() {
 
-    const Data = localStorage.getItem('Data') ? JSON.parse(localStorage.getItem('Data')) : [];
+    const [Data, setData] = useState(JSON.parse(localStorage.getItem('Data')) || []);
     const [activeChatId, setActiveChatId] = useState(null);
     const [activeChat, setActiveChat] = useState(false);
     const [msgs, setMsgs] = useState([]);
     const [userName, setUserName] = useState('');
     const [inputBox, setInputBox] = useState(false);
-
-
 
     const handleChatClick = (chatId) => {
         setActiveChatId(chatId);
@@ -25,37 +23,26 @@ export default function Chat() {
         setActiveChat(true);
     };
 
-
-
     useEffect(() => {
-
-        // const Data = JSON.parse(localStorage.getItem("Data"));
-
-
-        const messages = localStorage.getItem('currentUser')
-        console.log(messages);
+        const messages = localStorage.getItem('currentUser');
         if (messages) {
-            setMsgs(JSON.parse(messages)[0].msg)
+            setMsgs(JSON.parse(messages)[0].msg);
+        } else {
+            setMsgs([]);
         }
-        else {
-            setMsgs([])
-        }
-    }, [])
+    }, []);
 
     useEffect(() => {
-        const Data = JSON.parse(localStorage.getItem("Data"));
         if (activeChatId !== null && Data[activeChatId]) {
-            setUserName(Data[activeChatId-1].name);
+            setUserName(Data[activeChatId - 1].name);
         } else if (Data.length > 0) {
-            // If activeChatId is null or invalid, set the userName to the last user's name
             setUserName(Data[Data.length - 1].name);
         }
-    }, [activeChatId]);
-
+    }, [activeChatId, Data]);
 
     const onClick = () => {
         setInputBox(true);
-    }
+    };
 
     const addUser = () => {
         const inputUser = document.getElementById('inputuser').value;
@@ -64,24 +51,20 @@ export default function Chat() {
             id: Data.length + 1,
             name: inputUser,
             avatar: 'https://api.dicebear.com/8.x/pixel-art/svg',
-            lastMessage: "",
+            lastMessage: '',
             messageHistory: []
         };
 
-        Data.push(newUser);
-        localStorage.setItem('Data', JSON.stringify(Data));
+        const newData = [...Data, newUser];
+        setData(newData);
+        localStorage.setItem('Data', JSON.stringify(newData));
         setUserName(newUser.name);
         setActiveChatId(newUser.id);
-        console.log(newUser.id);
-        console.log(Data);
-        console.log(Data.length);
-        console.log(activeChatId);
         localStorage.setItem('activeChatId', newUser.id);
         setActiveChat(true);
-
         setInputBox(false);
-    }
-
+    };
+    
     return (
         <div className="h-screen">
 
